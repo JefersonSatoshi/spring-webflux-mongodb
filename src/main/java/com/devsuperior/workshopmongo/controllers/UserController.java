@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.devsuperior.workshopmongo.dto.PostDTO;
 import com.devsuperior.workshopmongo.dto.UserDTO;
@@ -46,10 +47,11 @@ public class UserController {
 	}
 
 	@PostMapping
-	public Mono<ResponseEntity<UserDTO>> insert(@RequestBody UserDTO dto) {
-		dto = service.insert(dto);
-		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(dto.getId()).toUri();
-		return ResponseEntity.created(uri).body(dto);
+	public Mono<ResponseEntity<UserDTO>> insert(@RequestBody UserDTO dto, UriComponentsBuilder builder) {
+		return service.insert(dto)
+				.map(newUser -> ResponseEntity
+						.created(builder.path("/users/{id}").buildAndExpand(newUser.getId()).toUri())
+						.body(newUser));
 	}
 
 	@PutMapping(value = "/{id}")
