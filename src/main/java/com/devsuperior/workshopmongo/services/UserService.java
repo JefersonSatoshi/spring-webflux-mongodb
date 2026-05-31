@@ -12,41 +12,39 @@ import com.devsuperior.workshopmongo.entities.User;
 import com.devsuperior.workshopmongo.repositories.UserRepository;
 import com.devsuperior.workshopmongo.services.exceptions.ResourceNotFoundException;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 @Service
 public class UserService {
 
 	@Autowired
 	private UserRepository repository;
 
-	@Transactional(readOnly = true)
-	public List<UserDTO> findAll() {
-		List<UserDTO> result = repository.findAll().stream().map(x -> new UserDTO(x)).toList();
-		return result;
+	public Flux<UserDTO> findAll() {
+		return repository.findAll().map(x -> new UserDTO(x));
 	}
 
-	@Transactional(readOnly = true)
-	public UserDTO findById(String id) {
-		User user = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado"));
-		return new UserDTO(user);
+	public Mono<UserDTO> findById(String id) {
+		return repository.findById(id)
+				.map(x -> new UserDTO(x))
+				.switchIfEmpty(Mono.error(new ResourceNotFoundException("Recurso não encontrado")));
 	}
 
-	@Transactional(readOnly = true)
 	public List<PostDTO> findPosts(String id) {
 		User user = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado"));
 		List<PostDTO> result = user.getPosts().stream().map(x -> new PostDTO(x)).toList();
 		return result;
 	}
 
-	@Transactional
-	public UserDTO insert(UserDTO dto) {
+	public Mono<UserDTO> insert(UserDTO dto) {
 		User entity = new User();
 		copyDtoToEntity(dto, entity);
-		entity = repository.save(entity);
-		return new UserDTO(entity);
+		return repository.save(entity).map(x -> new UserDTO(x));
 	}
 
-	@Transactional
-	public UserDTO update(String id, UserDTO dto) {
+	public Mono<UserDTO> update(String id, UserDTO dto) {
+		return repository.findById(id)
 		User entity = repository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado"));
 		copyDtoToEntity(dto, entity);

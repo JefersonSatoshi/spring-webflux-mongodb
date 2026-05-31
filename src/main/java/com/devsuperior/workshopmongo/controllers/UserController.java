@@ -19,6 +19,9 @@ import com.devsuperior.workshopmongo.dto.PostDTO;
 import com.devsuperior.workshopmongo.dto.UserDTO;
 import com.devsuperior.workshopmongo.services.UserService;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 @RestController
 @RequestMapping(value = "/users")
 public class UserController {
@@ -27,15 +30,13 @@ public class UserController {
 	private UserService service;
 
 	@GetMapping
-	public ResponseEntity<List<UserDTO>> findAll() {
-		List<UserDTO> list = service.findAll();
-		return ResponseEntity.ok().body(list);
+	public Flux<UserDTO> findAll() {
+		return service.findAll();
 	}
 
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<UserDTO> findById(@PathVariable String id) {
-		UserDTO dto = service.findById(id);
-		return ResponseEntity.ok(dto);
+	public Mono<ResponseEntity<UserDTO>> findById(@PathVariable String id) {
+		return service.findById(id).map(x -> ResponseEntity.ok().body(x));
 	}
 	
 	@GetMapping(value = "/{id}/posts")
@@ -45,7 +46,7 @@ public class UserController {
 	}
 
 	@PostMapping
-	public ResponseEntity<UserDTO> insert(@RequestBody UserDTO dto) {
+	public Mono<ResponseEntity<UserDTO>> insert(@RequestBody UserDTO dto) {
 		dto = service.insert(dto);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(dto.getId()).toUri();
 		return ResponseEntity.created(uri).body(dto);
