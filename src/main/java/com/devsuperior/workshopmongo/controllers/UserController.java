@@ -55,9 +55,8 @@ public class UserController {
 	}
 
 	@PutMapping(value = "/{id}")
-	public ResponseEntity<UserDTO> update(@PathVariable String id, @RequestBody UserDTO dto) {
-		dto = service.update(id, dto);
-		return ResponseEntity.ok(dto);
+	public Mono<ResponseEntity<UserDTO>> update(@PathVariable String id, @RequestBody UserDTO dto) {
+		return service.update(id, dto).map(userUpdated -> ResponseEntity.ok().body(userUpdated));
 	}
 	
 	@DeleteMapping(value = "/{id}")
