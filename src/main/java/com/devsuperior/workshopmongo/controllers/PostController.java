@@ -17,6 +17,8 @@ import com.devsuperior.workshopmongo.controllers.util.URL;
 import com.devsuperior.workshopmongo.dto.PostDTO;
 import com.devsuperior.workshopmongo.services.PostService;
 
+import reactor.core.publisher.Mono;
+
 @RestController
 @RequestMapping(value = "/posts")
 public class PostController {
@@ -25,9 +27,8 @@ public class PostController {
 	private PostService service;
 
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<PostDTO> findById(@PathVariable String id) {
-		PostDTO dto = service.findById(id);
-		return ResponseEntity.ok(dto);
+	public Mono<ResponseEntity<PostDTO>> findById(@PathVariable String id) {
+		return service.findById(id).map(x -> ResponseEntity.ok().body(x));
 	}
 	
 	@GetMapping(value = "/titlesearch")

@@ -1,12 +1,8 @@
 package com.devsuperior.workshopmongo.services;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.devsuperior.workshopmongo.dto.PostDTO;
 import com.devsuperior.workshopmongo.dto.UserDTO;
 import com.devsuperior.workshopmongo.entities.User;
 import com.devsuperior.workshopmongo.repositories.UserRepository;
@@ -29,12 +25,6 @@ public class UserService {
 		return repository.findById(id)
 				.map(x -> new UserDTO(x))
 				.switchIfEmpty(Mono.error(new ResourceNotFoundException("Recurso não encontrado")));
-	}
-
-	public List<PostDTO> findPosts(String id) {
-		User user = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado"));
-		List<PostDTO> result = user.getPosts().stream().map(x -> new PostDTO(x)).toList();
-		return result;
 	}
 
 	public Mono<UserDTO> insert(UserDTO dto) {
